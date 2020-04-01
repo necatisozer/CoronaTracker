@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.create
 
 @Module
 class NetworkModule {
@@ -16,9 +17,9 @@ class NetworkModule {
     @Provides
     @Reusable
     internal fun provideOkHttpClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-        builder.addInterceptor(TokenInterceptor())
-        return builder.build()
+        return OkHttpClient.Builder()
+            .addInterceptor(TokenInterceptor())
+            .build()
     }
 
     @Provides
@@ -40,6 +41,6 @@ class NetworkModule {
     @Provides
     @Reusable
     fun provideRestInterface(retrofit: Retrofit): CoronaTrackerRestInterface {
-        return retrofit.create(CoronaTrackerRestInterface::class.java)
+        return retrofit.create()
     }
 }

@@ -12,12 +12,12 @@ import javax.inject.Singleton
 @Component(
     modules = [
         ApplicationModule::class,
+        CoroutinesModule::class,
         NetworkModule::class,
         NewsModule::class,
         DashboardModule::class]
 )
 interface ApplicationComponent {
-    fun newsComponent(): NewsComponent.Factory
-
-    fun dashboardComponent(): DashboardComponent.Factory
+    val newsComponent: NewsComponent.Factory
+    val dashboardComponent: DashboardComponent.Factory
 }

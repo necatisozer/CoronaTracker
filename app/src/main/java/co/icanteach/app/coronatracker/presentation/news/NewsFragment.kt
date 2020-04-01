@@ -1,24 +1,21 @@
 package co.icanteach.app.coronatracker.presentation.news
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import co.icanteach.app.coronatracker.CoronaTrackerApplication
 import co.icanteach.app.coronatracker.R
+import co.icanteach.app.coronatracker.appComponent
 import co.icanteach.app.coronatracker.core.observeNonNull
-import co.icanteach.app.coronatracker.presentation.MainActivity
 import co.icanteach.app.coronatracker.presentation.news.inject.NewsComponent
 import kotlinx.android.synthetic.main.fragment_news.*
 import javax.inject.Inject
 
-class NewsFragment : Fragment() {
+class NewsFragment : Fragment(R.layout.fragment_news) {
 
     private lateinit var newsComponent: NewsComponent
 
@@ -34,17 +31,9 @@ class NewsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        newsComponent = ((activity as MainActivity).applicationContext as CoronaTrackerApplication)
-            .appComponent.newsComponent().create()
-        newsComponent.inject(this)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_news, container, false)
+        newsComponent = appComponent.newsComponent.create().also {
+            it.inject(this)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,21 +51,21 @@ class NewsFragment : Fragment() {
 
     private fun openWebContent(url: String) {
         val builder = CustomTabsIntent.Builder()
-        builder.setToolbarColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
-        builder.addDefaultShareMenuItem()
-        builder.setShowTitle(true)
-        builder.setStartAnimations(
-            requireContext(),
-            android.R.anim.fade_in,
-            android.R.anim.fade_out
-        )
-        builder.setExitAnimations(
-            requireContext(),
-            android.R.anim.fade_in,
-            android.R.anim.fade_out
-        )
+            .setToolbarColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
+            .addDefaultShareMenuItem()
+            .setShowTitle(true)
+            .setStartAnimations(
+                requireContext(),
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            .setExitAnimations(
+                requireContext(),
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
 
         val customTabsIntent = builder.build()
-        customTabsIntent.launchUrl(requireContext(), Uri.parse(url))
+        customTabsIntent.launchUrl(requireContext(), url.toUri())
     }
 }

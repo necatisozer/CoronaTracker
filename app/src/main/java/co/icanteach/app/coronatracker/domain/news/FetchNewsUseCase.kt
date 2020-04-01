@@ -1,23 +1,27 @@
 package co.icanteach.app.coronatracker.domain.news
 
 import co.icanteach.app.coronatracker.core.Resource
+import co.icanteach.app.coronatracker.core.inject.DefaultDispatcher
+import co.icanteach.app.coronatracker.core.mapResource
 import co.icanteach.app.coronatracker.data.CoronaTrackerRepository
 import co.icanteach.app.coronatracker.domain.news.model.News
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class FetchNewsUseCase @Inject constructor(
     private val repository: CoronaTrackerRepository,
-    private val mapper: CoronaNewsMapper
+    private val mapper: CoronaNewsMapper,
+    @DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun fetchCoronaNews(): Flow<Resource<List<News>>> {
+    fun fetchCoronaNews(): Flow<Resource<List<News>>> {
         return repository
             .fetchCoronaNews()
-            .map { resource ->
-                resource.map {
-                    mapper.mapFromResponse(it.result)
+            .mapResource { newsResponse ->
+                withContext(dispatcher) {
+                    mapper.mapFromResponse(newsResponse.result)
                 }
             }
     }
