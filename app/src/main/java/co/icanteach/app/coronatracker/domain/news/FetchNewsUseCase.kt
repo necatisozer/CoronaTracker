@@ -6,8 +6,9 @@ import co.icanteach.app.coronatracker.core.mapResource
 import co.icanteach.app.coronatracker.data.CoronaTrackerRepository
 import co.icanteach.app.coronatracker.domain.news.model.News
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class FetchNewsUseCase @Inject constructor(
@@ -16,13 +17,11 @@ class FetchNewsUseCase @Inject constructor(
     @DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchCoronaNews(): Flow<Resource<List<News>>> {
         return repository
             .fetchCoronaNews()
-            .mapResource { newsResponse ->
-                withContext(dispatcher) {
-                    mapper.mapFromResponse(newsResponse.result)
-                }
-            }
+            .mapResource { newsResponse -> mapper.mapFromResponse(newsResponse.result) }
+            .flowOn(dispatcher)
     }
 }
