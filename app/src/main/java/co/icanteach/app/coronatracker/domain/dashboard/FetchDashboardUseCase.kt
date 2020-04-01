@@ -1,7 +1,7 @@
 package co.icanteach.app.coronatracker.domain.dashboard
 
 import co.icanteach.app.coronatracker.core.Resource
-import co.icanteach.app.coronatracker.core.combineWith
+import co.icanteach.app.coronatracker.core.combineResource
 import co.icanteach.app.coronatracker.core.inject.DefaultDispatcher
 import co.icanteach.app.coronatracker.data.CoronaTrackerRepository
 import co.icanteach.app.coronatracker.domain.DashboardItemMapper
@@ -22,7 +22,7 @@ class FetchDashboardUseCase @Inject constructor(
         val totalDataFlow = repository.fetchTotalData()
         val countriesDataFlow = repository.fetchCountriesData()
         return totalDataFlow
-            .combineWith(countriesDataFlow) { totalData, countriesData ->
+            .combineResource(countriesDataFlow) { totalData, countriesData ->
                 mapper.mapFromResponse(totalData, countriesData)
             }
             .flowOn(dispatcher)

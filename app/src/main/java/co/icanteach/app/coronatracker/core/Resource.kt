@@ -19,6 +19,20 @@ inline fun <T, R> Resource<T>.map(transform: (T) -> R): Resource<R> {
     }
 }
 
+inline fun <T1, T2, R> Resource<T1>.combine(
+    resource: Resource<T2>,
+    transform: (T1, T2) -> R
+): Resource<R> {
+    return when {
+        this is Resource.Success && resource is Resource.Success -> {
+            Resource.Success(transform(data, resource.data))
+        }
+        this is Resource.Error -> Resource.Error(exception)
+        resource is Resource.Error -> Resource.Error(resource.exception)
+        else -> Resource.Loading
+    }
+}
+
 inline fun <T, R> Flow<Resource<T>>.mapResource(crossinline transform: suspend (T) -> R): Flow<Resource<R>> {
     return map { resource ->
         resource.map { transform(it) }
@@ -26,16 +40,13 @@ inline fun <T, R> Flow<Resource<T>>.mapResource(crossinline transform: suspend (
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-inline fun <T1, T2, R> Flow<Resource<T1>>.combineWith(
+inline fun <T1, T2, R> Flow<Resource<T1>>.combineResource(
     flow: Flow<Resource<T2>>,
     crossinline transform: suspend (T1, T2) -> R
-): Flow<Resource<R>> = combine(flow) { resource1, resource2 ->
-    when {
-        resource1 is Resource.Success && resource2 is Resource.Success -> {
-            Resource.Success(transform(resource1.data, resource2.data))
+): Flow<Resource<R>> {
+    return combine(flow) { resource1, resource2 ->
+        resource1.combine(resource2) { data1, data2 ->
+            transform(data1, data2)
         }
-        resource1 is Resource.Error -> Resource.Error(resource1.exception)
-        resource2 is Resource.Error -> Resource.Error(resource2.exception)
-        else -> Resource.Loading
     }
 }
